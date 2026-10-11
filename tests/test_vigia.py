@@ -187,6 +187,40 @@ async def test_rate_limit_backs_off(hass, feeds):
     assert c.cache["fogos"]["backoff_until"] > 0
 
 
+async def test_new_fogos_key_ends_backoff(hass, feeds, hass_storage):
+    from unittest.mock import patch
+    from custom_components.vigia import sources
+    from custom_components.vigia.coordinator import STORE_VERSION
+
+    entry = await _setup(hass)
+    c = entry.runtime_data
+
+    async def limited(*a, **k):
+        raise sources.RateLimited(None)
+
+    c.cache["fogos"]["fetched"] = 0
+    with patch("custom_components.vigia.sources.fogos", limited):
+        await c.async_refresh()
+    assert c.cache["fogos"]["backoff_until"] > 0
+    # what the store holds after anonymous 429s (written straight away rather than waiting for the delayed save)
+    hass_storage[f"vigia.{entry.entry_id}"] = {"version": STORE_VERSION, "minor_version": 1, "key": f"vigia.{entry.entry_id}",
+                                              "data": {"cache": c.cache, "settings": c.settings, "alerted": [],
+                                                       "home": c._place(), "fogos_key": c._fogos_key_id()}}
+
+    keys = []
+
+    async def fogos(session, lat, lon, radius, key):
+        keys.append(key)
+        return []
+
+    with patch("custom_components.vigia.sources.fogos", fogos):
+        hass.config_entries.async_update_entry(entry, options={**entry.options, "fogos_key": "new-key"})
+        await hass.async_block_till_done()
+    assert keys == ["new-key"]
+    c = entry.runtime_data
+    assert c.cache["fogos"]["ok"] is True and c.cache["fogos"]["backoff_until"] == 0
+
+
 async def test_fogos_key_is_sent(hass, aioclient_mock):
     from homeassistant.helpers.aiohttp_client import async_get_clientsession
     from custom_components.vigia import sources

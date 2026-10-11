@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import logging
 import math
 import time
@@ -94,6 +95,11 @@ class VigiaCoordinator(DataUpdateCoordinator[dict]):
     def _place(self) -> list:
         return [*self.home, self.radius, self.opts.get(CONF_CONCELHO) or ""]
 
+    def _fogos_key_id(self) -> str:
+        """A short fingerprint of the fogos.pt key, so a new key can be spotted without storing it."""
+        key = self.opts.get(CONF_FOGOS_KEY) or ""
+        return hashlib.sha256(key.encode()).hexdigest()[:12] if key else ""
+
     def _enabled(self, name: str) -> bool:
         o = self.opts
         if name == "firms":
@@ -118,6 +124,9 @@ class VigiaCoordinator(DataUpdateCoordinator[dict]):
             self.alerted = []
             for name in ("ipma_risk", "ipma_warnings", "fogos", "firms", "effis", "wind"):
                 self.cache.pop(name, None)
+        # a new or removed fogos.pt key ends any back-off earned under the old one (e.g. anonymous 429s)
+        if stored.get("fogos_key") != self._fogos_key_id() and "fogos" in self.cache:
+            self.cache["fogos"].update(backoff_until=0, strikes=0)
         now = time.time()
         for c in self.cache.values():
             if c.get("backoff_until", 0) <= now:
@@ -127,6 +136,7 @@ class VigiaCoordinator(DataUpdateCoordinator[dict]):
         self._store.async_delay_save(lambda: {
             "cache": self.cache, "settings": self.settings,
             "alerted": [a for a in self.alerted if not a.get("test")], "home": self._place(),
+            "fogos_key": self._fogos_key_id(),
         }, 10)
 
     # ---------- wind at home ----------
