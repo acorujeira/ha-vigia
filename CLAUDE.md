@@ -15,7 +15,9 @@ Home Assistant custom integration (domain `vigia`) for wildfire watch in Norther
 
 ## Tests
 
-System pip can't build the test deps (PyRIC). Use uv:
+Don't install the test deps in a session; it pulls all of Home Assistant and costs a lot of tokens. The `tests` job in `.github/workflows/validate.yaml` runs pytest on every push. Push, then check the run with the GitHub MCP tools (`actions_list` / `get_job_logs`).
+
+Only if CI can't answer the question (e.g. debugging one test interactively), set up locally with uv, since system pip can't build PyRIC:
 
 ```
 uv venv
@@ -26,8 +28,8 @@ uv pip install pytest-homeassistant-custom-component
 ## Release
 
 1. Bump the version in all three places: `VERSION` in `const.py`, `manifest.json`, and `frontend/vigia-card.js`.
-2. Run the tests.
-3. Push to `main`. No tags or GitHub releases (cloud sessions get 403); HACS tracks commits on `main`.
+2. Push and confirm the Validate workflow is green.
+3. Merge to `main`. No tags or GitHub releases (cloud sessions get 403); HACS tracks commits on `main`.
 4. In Home Assistant: HACS update information + download for repo id `1411579568`, then restart HA.
 
 The integration registers its card resource as `/vigia_static/vigia-card.js?v=<version>`. Never edit that resource by hand; the version bump is what makes phones and the tablet load the new card. After a restart the HA connection is often down for a few minutes; polling `/vigia_static/vigia-card.js` shows when it is back.
