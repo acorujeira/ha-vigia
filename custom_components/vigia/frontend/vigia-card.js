@@ -3,7 +3,7 @@
    custom:vigia-map-card  the fire map on its own, for a pop-up or a dashboard view
    https://github.com/eyeofeska/ha-vigia (MIT) */
 (() => {
-const VERSION = "0.1.11";
+const VERSION = "0.1.12";
 const LEAFLET = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/";
 const LEVELS = [null,
   { name: "low", color: "#3DAA5C" }, { name: "moderate", color: "#D9A400" }, { name: "high", color: "#F07F1A" },
@@ -330,9 +330,10 @@ class VigiaCard extends HTMLElement {
     const bits = [];
     const T = LEVELS[tom.level];
     if (T) bits.push(`tomorrow ${T.name}`);
-    const n = (d.counts.incidents || 0) + (d.counts.hotspots || 0);
-    bits.push(n ? `${n} fire${n > 1 ? "s" : ""} within ${Math.round(d.radius_km)} km, nearest ${km(d.nearest && d.nearest.distance)} km ${(d.nearest && d.nearest.dir) || ""}`
-      : `no fires within ${Math.round(d.radius_km)} km`);
+    const inc = d.counts.incidents || 0, heat = d.counts.heat_spots != null ? d.counts.heat_spots : (d.counts.hotspots || 0);
+    const R = Math.round(d.radius_km), near = d.nearest ? `, nearest ${km(d.nearest.distance)} km ${d.nearest.dir || ""}`.trimEnd() : "";
+    if (!inc && !heat) bits.push(`no fires within ${R} km`);
+    else bits.push(`${inc} reported fire${inc === 1 ? "" : "s"} · ${heat} satellite heat spot${heat === 1 ? "" : "s"} within ${R} km${near}`);
     const live = Object.values(d.sources).filter(s => s.enabled);
     const stale = live.length && live.every(s => !s.ok);
     if (stale) {
@@ -719,9 +720,9 @@ class VigiaMapDialog extends HTMLElement {
     this.shadowRoot.querySelector("vigia-map").data = d;
     const w = d.wind || {};
     const windTxt = w.speed != null ? `wind ${Math.round(w.speed)} km/h${w.from != null ? " from " + ["N", "NE", "E", "SE", "S", "SW", "W", "NW"][Math.round(w.from / 45) % 8] : ""}` : "";
-    const n = d.counts.incidents, h = d.counts.hotspots;
+    const n = d.counts.incidents, h = d.counts.hotspots, hs = d.counts.heat_spots != null ? d.counts.heat_spots : h;
     this.shadowRoot.querySelector(".t2").textContent = [
-      `${n} reported fire${n === 1 ? "" : "s"}, ${h} heat detection${h === 1 ? "" : "s"} (24 h)`, windTxt, `updated ${hhmm(d.computed)}`,
+      `${n} reported fire${n === 1 ? "" : "s"}, ${hs} heat spot${hs === 1 ? "" : "s"} from ${h} detection${h === 1 ? "" : "s"} (24 h)`, windTxt, `updated ${hhmm(d.computed)}`,
       d.test_mode ? "test mode" : "",
     ].filter(Boolean).join(" · ");
   }

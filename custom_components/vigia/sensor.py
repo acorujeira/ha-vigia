@@ -103,7 +103,7 @@ class NearestSensor(VigiaEntity, SensorEntity):
 
 
 class CountSensor(VigiaEntity, SensorEntity):
-    """Active incidents plus satellite hotspots from the last 24 h within the map radius."""
+    """Reported active incidents plus satellite heat spots (24 h, detections within 1.2 km merged) in the map radius."""
 
     _attr_icon = "mdi:fire-circle"
     _attr_state_class = SensorStateClass.MEASUREMENT
@@ -111,10 +111,11 @@ class CountSensor(VigiaEntity, SensorEntity):
     @property
     def native_value(self) -> int:
         c = self.coordinator.data.get("counts") or {}
-        return (c.get("incidents") or 0) + (c.get("hotspots") or 0)
+        heat = c.get("heat_spots")
+        return (c.get("incidents") or 0) + (heat if heat is not None else c.get("hotspots") or 0)
 
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
         c = self.coordinator.data.get("counts") or {}
-        return {"incidents": c.get("incidents"), "hotspots_24h": c.get("hotspots"),
+        return {"incidents": c.get("incidents"), "heat_spots": c.get("heat_spots"), "hotspots_24h": c.get("hotspots"),
                 "radius_km": self.coordinator.data.get("radius_km"), "test_mode": self.coordinator.data.get("test_mode")}

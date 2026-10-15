@@ -18,6 +18,7 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from . import sources
 from .const import (
+    HEAT_SPOT_LINK_KM,
     ALERT_MAX_AGE_H,
     CLOSER_BY_KM,
     CONF_CONCELHO,
@@ -42,7 +43,7 @@ from .const import (
     WARNING_AREAS,
     WARNING_RANK,
 )
-from .geo import ang_diff, bearing_deg, compass, distance_km, offset
+from .geo import ang_diff, bearing_deg, cluster_count, compass, distance_km, offset
 
 _LOGGER = logging.getLogger(__name__)
 STORE_VERSION = 1
@@ -348,6 +349,7 @@ class VigiaCoordinator(DataUpdateCoordinator[dict]):
         threats.sort(key=lambda t: (-TIER_RANK[t["tier"]], t["distance"]))
         nearby = [i for i in incidents if i.get("active")] + [h for h in hotspots if h["age_h"] <= 24]
         nearest = min(nearby, key=lambda x: x["distance"]) if nearby else None
+        recent = [h for h in hotspots if h["age_h"] <= 24 and h["distance"] <= self.radius]
 
         if evaluate:
             self._evaluate(threats, wind, now)
@@ -377,7 +379,8 @@ class VigiaCoordinator(DataUpdateCoordinator[dict]):
             } if nearest else None,
             "counts": {
                 "incidents": sum(1 for i in incidents if i.get("active") and i["distance"] <= self.radius),
-                "hotspots": sum(1 for h in hotspots if h["age_h"] <= 24 and h["distance"] <= self.radius),
+                "hotspots": len(recent),
+                "heat_spots": cluster_count(recent, HEAT_SPOT_LINK_KM),
             },
             "sources": {
                 n: {"enabled": self._enabled(n), "ok": c.get("ok", False), "updated": c.get("updated"), "error": c.get("error")}

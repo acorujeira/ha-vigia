@@ -46,3 +46,21 @@ def bbox(lat: float, lon: float, km: float) -> tuple[float, float, float, float]
     dlat = km / 111.32
     dlon = km / (111.32 * math.cos(math.radians(lat)))
     return lon - dlon, lat - dlat, lon + dlon, lat + dlat
+
+
+def cluster_count(points: list[dict], link_km: float) -> int:
+    """Number of groups when points closer than link_km are chained together (single link)."""
+    root = list(range(len(points)))
+
+    def find(i: int) -> int:
+        while root[i] != i:
+            root[i] = root[root[i]]
+            i = root[i]
+        return i
+
+    for i, a in enumerate(points):
+        for j in range(i + 1, len(points)):
+            b = points[j]
+            if distance_km(a["lat"], a["lon"], b["lat"], b["lon"]) < link_km:
+                root[find(i)] = find(j)
+    return len({find(i) for i in range(len(points))})
