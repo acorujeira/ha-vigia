@@ -25,7 +25,7 @@ from .geo import bbox
 _LOGGER = logging.getLogger(__name__)
 
 OVERPASS = ["https://overpass-api.de/api/interpreter", "https://overpass.kumi.systems/api/interpreter"]
-HEADERS = {"User-Agent": f"Vigia/{VERSION.rsplit('.', 1)[0]} (https://github.com/eyeofeska/ha-vigia)"}
+HEADERS = {"User-Agent": f"Vigia/{VERSION.rsplit('.', 1)[0]} (https://github.com/acorujeira/ha-vigia)"}
 REFRESH_S = 30 * 86400
 RETRY_S = 6 * 3600
 LINE_KINDS = ("river", "stream", "canal")

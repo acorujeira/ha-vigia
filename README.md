@@ -36,7 +36,7 @@ Everything is fetched by Home Assistant and kept, so the tile, map and alerts ca
 
 ## Install
 
-1. In HACS, open the menu › **Custom repositories**, add `https://github.com/eyeofeska/ha-vigia` as an **Integration**, then download **Vigia**.
+1. In HACS, open the menu › **Custom repositories**, add `https://github.com/acorujeira/ha-vigia` as an **Integration**, then download **Vigia**.
 2. Restart Home Assistant.
 3. **Settings › Devices & services › Add integration › Vigia.**
    - **fogos.pt API key** (optional, free): fogos.pt asks each user to [request their own key](https://fogos.pt/en/api). Without one Vigia polls every 15 minutes and backs off when asked; shared connections (Starlink, mobile data) may still be rate limited.

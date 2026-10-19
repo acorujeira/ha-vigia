@@ -4,9 +4,9 @@
   "codeowners": ["@eyeofeska"],
   "config_flow": true,
   "dependencies": ["frontend", "http", "lovelace", "websocket_api"],
-  "documentation": "https://github.com/eyeofeska/ha-vigia",
+  "documentation": "https://github.com/acorujeira/ha-vigia",
   "iot_class": "cloud_polling",
-  "issue_tracker": "https://github.com/eyeofeska/ha-vigia/issues",
+  "issue_tracker": "https://github.com/acorujeira/ha-vigia/issues",
   "requirements": [],
   "single_config_entry": true,
   "version": "0.1.12"

@@ -37,7 +37,7 @@ The integration registers its card resource as `/vigia_static/vigia-card.js?v=<v
 ## Sources and rules
 
 - IPMA fire risk (set by the `ipma_concelho` option) and weather warnings.
-- fogos.pt incidents. Terms: show "Source: Fogos.pt", no monetisation, never the sole source for an alert. Send `User-Agent: Vigia/<version> (https://github.com/eyeofeska/ha-vigia)`. Anonymous use gets rate-limited (429); with a key Vigia polls every 10 min, without one every 15 min with back-off.
+- fogos.pt incidents. Terms: show "Source: Fogos.pt", no monetisation, never the sole source for an alert. Send `User-Agent: Vigia/<version> (https://github.com/acorujeira/ha-vigia)`. Anonymous use gets rate-limited (429); with a key Vigia polls every 10 min, without one every 15 min with back-off.
 - NASA FIRMS VIIRS hotspots, only when a map key is set.
 - EFFIS burnt areas: WFS layer `ms:modis.ba.poly`, `outputformat=geojson`. EFFIS returns lat,lon order; Vigia swaps it. `BURNT_SEASONS = 3` keeps this year plus the two before, each area tagged with `year`.
 - Open-Meteo wind grid; wind at home from the HA weather entity.

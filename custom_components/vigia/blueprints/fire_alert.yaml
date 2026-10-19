@@ -6,7 +6,7 @@ blueprint:
     critical alert on iOS); watch alerts arrive as normal notifications.
     Vigia sends one alert per fire and repeats only when the fire gets closer or moves up a tier.
   domain: automation
-  source_url: https://github.com/eyeofeska/ha-vigia/blob/main/custom_components/vigia/blueprints/fire_alert.yaml
+  source_url: https://github.com/acorujeira/ha-vigia/blob/main/custom_components/vigia/blueprints/fire_alert.yaml
   input:
     phones:
       name: Phones

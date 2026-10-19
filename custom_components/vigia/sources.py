@@ -30,7 +30,7 @@ from .geo import bbox, distance_km
 
 _LOGGER = logging.getLogger(__name__)
 TIMEOUT = aiohttp.ClientTimeout(total=30)
-HEADERS = {"User-Agent": f"Vigia/{VERSION.rsplit('.', 1)[0]} (https://github.com/eyeofeska/ha-vigia)"}
+HEADERS = {"User-Agent": f"Vigia/{VERSION.rsplit('.', 1)[0]} (https://github.com/acorujeira/ha-vigia)"}
 
 
 class SourceError(Exception):

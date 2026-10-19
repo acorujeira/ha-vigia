@@ -23,5 +23,5 @@ class VigiaEntity(CoordinatorEntity[VigiaCoordinator]):
             model="Wildfire watch",
             sw_version=VERSION,
             entry_type=DeviceEntryType.SERVICE,
-            configuration_url="https://github.com/eyeofeska/ha-vigia",
+            configuration_url="https://github.com/acorujeira/ha-vigia",
         )

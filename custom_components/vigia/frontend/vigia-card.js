@@ -1,7 +1,7 @@
 /* Vigia: wildfire watch cards for Home Assistant. Served and registered by the Vigia integration.
    custom:vigia-card      fire risk tile with alert settings; tap opens the fire map
    custom:vigia-map-card  the fire map on its own, for a pop-up or a dashboard view
-   https://github.com/eyeofeska/ha-vigia (MIT) */
+   https://github.com/acorujeira/ha-vigia (MIT) */
 (() => {
 const VERSION = "0.1.12";
 const LEAFLET = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/";
@@ -755,6 +755,6 @@ window.customCards = window.customCards || [];
 for (const c of [
   { type: "vigia-card", name: "Vigia fire tile", description: "Fire risk, warnings, nearby fires and alert settings. Tap for the fire map." },
   { type: "vigia-map-card", name: "Vigia fire map", description: "Nearby fires, satellite heat, burnt areas and wind on a terrain map." },
-]) if (!window.customCards.find(x => x.type === c.type)) window.customCards.push({ ...c, preview: false, documentationURL: "https://github.com/eyeofeska/ha-vigia" });
+]) if (!window.customCards.find(x => x.type === c.type)) window.customCards.push({ ...c, preview: false, documentationURL: "https://github.com/acorujeira/ha-vigia" });
 console.info(`%c VIGIA %c ${VERSION} `, "background:#E0402C;color:#fff;font-weight:700", "background:#333;color:#fff");
 })();
