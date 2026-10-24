@@ -5,6 +5,7 @@ import asyncio
 import hashlib
 import logging
 import math
+import random
 import time
 from datetime import datetime, timedelta, timezone
 from typing import Any
@@ -38,6 +39,8 @@ from .const import (
     REFRESH,
     SAME_FIRE_KM,
     SETTINGS,
+    TEST_FIRE_PASSES,
+    TEST_FIRE_RUN_KM,
     TIER_RANK,
     URL_FOGOS_MAP,
     WARNING_AREAS,
@@ -284,7 +287,11 @@ class VigiaCoordinator(DataUpdateCoordinator[dict]):
             self.async_set_updated_data(self._compute(evaluate=True))
 
     def _make_fake(self) -> dict:
-        """A pretend fire just upwind (or close, if there's no wind), and an older one further off."""
+        """A pretend fire just upwind (or close, if there's no wind), and an older one further off.
+
+        The near fire has burned for two days: satellite passes every few hours each see its moving front, so
+        the map shows growth rings from a pale 2-day-old tail up to a red front heading for home.
+        """
         lat, lon = self.home
         w = self.wind()
         now = datetime.now(timezone.utc)
@@ -294,10 +301,21 @@ class VigiaCoordinator(DataUpdateCoordinator[dict]):
             brg, dist = 20.0, self.settings["close_km"] * 0.75
         flat, flon = offset(lat, lon, dist, brg)
         hot = []
-        for i, (dx, dy) in enumerate([(0, 0), (0.35, 0.1), (-0.3, 0.2), (0.1, -0.35), (0.45, -0.25), (-0.15, -0.5)]):
-            plat, plon = offset(flat, flon, math.hypot(dx, dy), math.degrees(math.atan2(dx, dy)))
-            hot.append({"id": f"test-new-{i}", "lat": plat, "lon": plon, "sat": "NOAA-21", "frp": 12.0 + i,
-                        "time": (now - timedelta(minutes=50 + 20 * i)).isoformat(), "test": True})
+        spread = (brg + 180) % 360  # the fire runs from its ignition toward home
+        rand = random.Random(7)  # same fire every time
+        for p, (age, sat) in enumerate(TEST_FIRE_PASSES):
+            t = p / (len(TEST_FIRE_PASSES) - 1)  # 0 at ignition, 1 at today's front
+            u = -TEST_FIRE_RUN_KM * (1 - t)  # how far behind the front this pass's edge sits
+            half = 0.15 + 0.55 * t ** 0.8  # the head widens as it runs
+            n = max(1, round(2 * half / 0.33) + 1)
+            for j in range(n):
+                v = -half + 2 * half * j / (n - 1) if n > 1 else 0.0
+                du = u - 0.45 * v * v / max(half, 0.3) + rand.uniform(-0.07, 0.07)  # flanks trail the head
+                dv = v + rand.uniform(-0.07, 0.07)
+                plat, plon = offset(flat, flon, math.hypot(du, dv), (spread + math.degrees(math.atan2(dv, du))) % 360)
+                hot.append({"id": f"test-new-{p}-{j}", "lat": plat, "lon": plon, "sat": sat,
+                            "frp": round(3.0 + 18.0 * t ** 2 * (1 - 0.5 * abs(v) / half) + rand.uniform(0, 3), 1),
+                            "time": (now - timedelta(hours=age)).isoformat(), "test": True})
         olat, olon = offset(lat, lon, 9, (brg + 140) % 360)
         for i, (dx, dy) in enumerate([(0, 0), (0.4, 0.15), (0.2, 0.5), (-0.3, 0.3)]):
             plat, plon = offset(olat, olon, math.hypot(dx, dy), math.degrees(math.atan2(dx, dy)))

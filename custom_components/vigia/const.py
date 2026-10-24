@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 DOMAIN = "vigia"
-VERSION = "0.1.12"
+VERSION = "0.1.13"
 
 EVENT_ALERT = "vigia_alert"
 STATIC_URL = "/vigia_static"
@@ -41,6 +41,10 @@ ALERT_MAX_AGE_H = 12
 HOTSPOT_MAX_AGE_H = 48
 # detections or incidents this close to an earlier alert count as the same fire
 SAME_FIRE_KM = 2.0
+# test mode: satellite passes over the pretend fire as (hours ago, satellite), oldest first, and how far it has run
+TEST_FIRE_PASSES = [(46, "S-NPP"), (40, "NOAA-20"), (34, "NOAA-21"), (28, "S-NPP"), (22, "NOAA-20"), (16, "NOAA-21"),
+                    (11, "S-NPP"), (8, "NOAA-20"), (4, "NOAA-21"), (1, "S-NPP")]
+TEST_FIRE_RUN_KM = 3.4
 # satellite detections closer than this count as one heat spot (matches the map footprints)
 HEAT_SPOT_LINK_KM = 1.2
 # a repeat alert for the same fire needs it this much closer (or a higher tier)
